@@ -296,6 +296,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   jumpForce: 5
   gravityScale: 1
+  screenPadding: 0.5
 --- !u!1 &1430095831
 GameObject:
   m_ObjectHideFlags: 0
