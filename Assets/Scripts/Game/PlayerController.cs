@@ -2,40 +2,29 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public float moveSpeed = 5f;
-    public float jumpForce = 5f;
+    public float jumpForce = 10f;  // Force applied when jumping
+    public float gravityScale = 1f;  // Gravity for the Rigidbody2D
+
     private Rigidbody2D rb;
-    private bool isGrounded = true;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        rb.gravityScale = gravityScale;  // Set gravity scale
     }
 
     void Update()
     {
-        // Get input from the virtual joystick
-        float moveX = FindObjectOfType<VirtualJoystick>().Horizontal();
-        Vector2 movement = new Vector2(moveX * moveSpeed, rb.velocity.y);
-
-        // Apply horizontal movement
-        rb.velocity = movement;
-    }
-
-    public void Jump()
-    {
-        if (isGrounded)
+        // Detect jump input (spacebar or screen tap)
+        if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0))
         {
-            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
-            isGrounded = false;
+            Jump();
         }
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    void Jump()
     {
-        if (collision.gameObject.CompareTag("Ground"))
-        {
-            isGrounded = true;
-        }
+        // Apply upward force for jumping
+        rb.velocity = new Vector2(rb.velocity.x, jumpForce);
     }
 }
