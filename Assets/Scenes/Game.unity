@@ -622,6 +622,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ba2cf874926347409f0edce094b2c97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  tapThreshold: 0.3
+  lowPassFilterFactor: 0.1
+  right_bound_lower: 1
+  right_bound_upper: 89
+  left_bound_lower: 359
+  left_bound_upper: 271
 --- !u!1 &1928787403
 GameObject:
   m_ObjectHideFlags: 0
