@@ -1,35 +1,72 @@
 using UnityEngine;
 
-public class DetectTap : MonoBehaviour
+public class TableTapInput : MonoBehaviour
 {
-    // Sensitivity threshold for detecting a tap. Adjust based on your testing.
-    [SerializeField] private float tapThreshold = 2.0f;
+    private Vector3 acceleration;
+    private Vector3 previousAcceleration;
+    private float tapThreshold = 3.0f; // Threshold for detecting sudden taps
+    private float lowPassFilterFactor = 0.1f; // Smoothing factor for accelerometer
+    private Vector3 smoothedAcceleration;
 
-    // Cooldown time to prevent multiple detections for a single tap
-    [SerializeField] private float tapCooldown = 0.2f;
-    private float lastTapTime = 0f;
+    private float timeSinceLastTap = 0f;
+    private float tapCooldown = 0.5f; // Prevent multiple detections for a single tap
 
-    void Update()
+    private float bottomQuarterY;
+
+    private void Start()
     {
-        // Get the current accelerometer reading
-        Vector3 acceleration = Input.acceleration;
+        // Enable the gyro if you need orientation data
+        Input.gyro.enabled = true;
 
-        // Calculate the magnitude of the acceleration vector
-        float magnitude = acceleration.magnitude;
+        // Calculate Y position for the bottom quarter of the screen
+        bottomQuarterY = Screen.height / 4f;
 
-        // Check if the acceleration exceeds the threshold
-        if (magnitude > tapThreshold && Time.time > lastTapTime + tapCooldown)
+        // Initialize smoothed acceleration
+        smoothedAcceleration = Input.acceleration;
+    }
+
+    private void Update()
+    {
+        // Update time since last tap
+        timeSinceLastTap += Time.deltaTime;
+
+        // Detect tap-like gestures from accelerometer
+        DetectTap();
+    }
+
+    private void DetectTap()
+    {
+        // Get the current acceleration data
+        acceleration = Input.acceleration;
+
+        // Apply a simple low-pass filter to smooth the accelerometer data
+        smoothedAcceleration = Vector3.Lerp(smoothedAcceleration, acceleration, lowPassFilterFactor);
+
+        // Detect sudden spikes in acceleration (tap-like motions)
+        Vector3 accelerationDelta = acceleration - smoothedAcceleration;
+
+        // If the change in acceleration is greater than the threshold and the cooldown is over, it's a tap
+        if (accelerationDelta.sqrMagnitude > tapThreshold * tapThreshold && timeSinceLastTap > tapCooldown)
         {
-            Debug.Log("Tap Detected!");
-            OnTap();
-            lastTapTime = Time.time;
+            timeSinceLastTap = 0f; // Reset cooldown timer
+
+            // Simulate a tap at the bottom quarter of the screen
+            SimulateTouchInput();
         }
     }
 
-    // This method will be called when a tap is detected
-    private void OnTap()
+    private void SimulateTouchInput()
     {
-        // Add your custom logic here (e.g., trigger an event, play a sound, etc.)
-        Debug.Log("Surface tap detected!");
+        // Simulate touch in the bottom quarter of the screen
+        Vector2 simulatedTouchPosition = new Vector2(Screen.width / 2f, bottomQuarterY / 2f);
+        Debug.Log($"Simulated touch at: {simulatedTouchPosition}");
+
+        // Example: Interact with a UI button or other objects in the bottom quarter
+        Ray ray = Camera.main.ScreenPointToRay(simulatedTouchPosition);
+        if (Physics.Raycast(ray, out RaycastHit hit))
+        {
+            // Interact with objects hit by the raycast
+            Debug.Log($"Hit object: {hit.collider.name}");
+        }
     }
 }
