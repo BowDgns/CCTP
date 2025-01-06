@@ -6,11 +6,21 @@ public class PlayerController : MonoBehaviour
     public float gravityScale = 1f; // Gravity for the Rigidbody2D
     public float screenPadding = 0.1f; // Padding to prevent the player from going too close to the edges
 
+    // Sprites for player and shadow
+    public Sprite playerJumpingSprite; // Player's jumping sprite
+    public Sprite playerIdleSprite; // Player's idle sprite
+    public Sprite shadowJumpingSprite; // Shadow's jumping sprite
+    public Sprite shadowIdleSprite; // Shadow's idle sprite
+
+    public GameObject shadowObject; // Reference to the shadow object (child of the player)
+
     private Rigidbody2D rb;
     private Camera mainCamera;
     private float cameraWidth;
+    private SpriteRenderer spriteRenderer; // Player's SpriteRenderer
+    private SpriteRenderer shadowSpriteRenderer; // Shadow's SpriteRenderer
 
-    private bool canJump = false; // Flag to determine if player can jump
+    private bool canJump = false; // Flag to determine if the player can jump
 
     void Start()
     {
@@ -21,6 +31,23 @@ public class PlayerController : MonoBehaviour
 
         // Calculate camera bounds in world space based on the camera's viewport
         cameraWidth = mainCamera.orthographicSize * mainCamera.aspect;
+
+        // Get the SpriteRenderer component for the player
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null && playerIdleSprite != null)
+        {
+            spriteRenderer.sprite = playerIdleSprite; // Set the initial sprite to idle
+        }
+
+        // Get the SpriteRenderer component for the shadow object
+        if (shadowObject != null)
+        {
+            shadowSpriteRenderer = shadowObject.GetComponent<SpriteRenderer>();
+            if (shadowSpriteRenderer != null && shadowIdleSprite != null)
+            {
+                shadowSpriteRenderer.sprite = shadowIdleSprite; // Set the shadow's initial sprite to idle
+            }
+        }
     }
 
     void Update()
@@ -89,6 +116,12 @@ public class PlayerController : MonoBehaviour
 
         // Keep the player within horizontal bounds (left and right)
         KeepPlayerInBounds();
+
+        // Update the sprite based on vertical movement
+        UpdateSpriteBasedOnMovement();
+
+        // Flip the sprite and the shadow if needed
+        FlipSpriteBasedOnDirection();
     }
 
     void Jump(Vector2 targetPosition)
@@ -120,5 +153,39 @@ public class PlayerController : MonoBehaviour
 
         // Apply the adjusted position to keep the player within bounds horizontally
         rb.position = playerPosition;
+    }
+
+    void UpdateSpriteBasedOnMovement()
+    {
+        if (spriteRenderer != null && shadowSpriteRenderer != null)
+        {
+            if (rb.velocity.y > 0) // Player is moving upwards
+            {
+                spriteRenderer.sprite = playerJumpingSprite;
+                shadowSpriteRenderer.sprite = shadowJumpingSprite;
+            }
+            else if (rb.velocity.y <= 0) // Player is falling or idle
+            {
+                spriteRenderer.sprite = playerIdleSprite;
+                shadowSpriteRenderer.sprite = shadowIdleSprite;
+            }
+        }
+    }
+
+    void FlipSpriteBasedOnDirection()
+    {
+        if (spriteRenderer != null && shadowSpriteRenderer != null)
+        {
+            if (rb.velocity.x > 0) // Moving to the right
+            {
+                spriteRenderer.flipX = false;
+                shadowSpriteRenderer.flipX = false; // Flip the shadow to match the player
+            }
+            else if (rb.velocity.x < 0) // Moving to the left
+            {
+                spriteRenderer.flipX = true;
+                shadowSpriteRenderer.flipX = true; // Flip the shadow to match the player
+            }
+        }
     }
 }
