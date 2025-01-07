@@ -327,7 +327,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   jumpForce: 5
-  gravityScale: 1
+  gravityScale: 0.5
   screenPadding: 0.5
   playerJumpingSprite: {fileID: 21300000, guid: ee62d326bb351404da5ed1975630b573, type: 3}
   playerIdleSprite: {fileID: 21300000, guid: 8886d9177b5e2064aa1a80a637523fcf, type: 3}
@@ -724,6 +724,7 @@ MonoBehaviour:
   right_bound_upper: 85
   left_bound_lower: 359
   left_bound_upper: 180
+  playerController: {fileID: 434165047}
 --- !u!1 &1928787403
 GameObject:
   m_ObjectHideFlags: 0

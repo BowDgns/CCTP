@@ -1,6 +1,7 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
-public class HybridInput : MonoBehaviour
+public class DetectTapInput : MonoBehaviour
 {
     private Vector3 acceleration;
     private Vector3 previousAcceleration;
@@ -19,6 +20,8 @@ public class HybridInput : MonoBehaviour
 
     private float bottomQuarterY;
 
+    public PlayerController playerController;
+
     private void Start()
     {
         // Enable the gyro if you need orientation data
@@ -29,7 +32,7 @@ public class HybridInput : MonoBehaviour
 
         // Initialize smoothed acceleration
         smoothedAcceleration = Input.acceleration;
-        previousAcceleration = smoothedAcceleration;
+        //previousAcceleration = smoothedAcceleration;
     }
 
     private void Update()
@@ -64,53 +67,21 @@ public class HybridInput : MonoBehaviour
             // Detect tilt based on the X-axis (for left-right motion)
             if (rotationEuler.x > right_bound_lower && rotationEuler.x < right_bound_upper) // Device tilted to the right (portrait view)
             {
-                SimulateTouchInput(Vector2.right);
+                playerController.Jump(Vector2.right);
+                Debug.Log($"Tap to the right");
             }
             else if (rotationEuler.x < left_bound_lower && rotationEuler.x > left_bound_upper) // Device tilted to the left (portrait view)
             {
-                SimulateTouchInput(Vector2.left);
+                playerController.Jump(Vector2.left);
+                Debug.Log($"Tap to the left");
             }
             else
             {
-                // Center input (if no significant tilt detected)
-                SimulateTouchInput(Vector2.zero);
+                playerController.Jump(Vector2.zero);
+                Debug.Log($"Tap center");
             }
         }
 
-        // Store the current acceleration for the next frame
-        previousAcceleration = acceleration;
-    }
-
-    private void SimulateTouchInput(Vector2 direction)
-    {
-        // Default to center position
-        Vector2 simulatedTouchPosition = new Vector2(Screen.width / 2f, bottomQuarterY / 2f);
-
-        // Adjust touch position based on detected direction
-        if (direction == Vector2.right)
-        {
-            simulatedTouchPosition.x += 100; // Simulate touch to the right
-            Debug.Log($"Tap to the right");
-
-        }
-        else if (direction == Vector2.left)
-        {
-            simulatedTouchPosition.x -= 100; // Simulate touch to the left
-            Debug.Log($"Tap to the left");
-        }
-        else
-        {
-            Debug.Log($"Tap center");
-        }
-
-        //Debug.Log($"Simulated touch at: {simulatedTouchPosition}");
-
-        // Example: Interact with a UI button or other objects in the bottom quarter
-        Ray ray = Camera.main.ScreenPointToRay(simulatedTouchPosition);
-        if (Physics.Raycast(ray, out RaycastHit hit))
-        {
-            // Interact with objects hit by the raycast
-            Debug.Log($"Hit object: {hit.collider.name}");
-        }
+        //previousAcceleration = acceleration;
     }
 }

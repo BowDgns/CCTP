@@ -28,6 +28,8 @@ public class PlayerController : MonoBehaviour
     public GameObject pointBObject; // Second empty GameObject
     public GameObject pointCObject; // Third empty GameObject
 
+    int jumps = 0;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -76,18 +78,6 @@ public class PlayerController : MonoBehaviour
                     }
                 }
             }
-
-            // Check for mouse input (for testing on desktop)
-            if (Input.GetMouseButtonDown(0)) // Left mouse button
-            {
-                Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition); // Convert mouse position to world coordinates
-                if (mousePosition.y < rb.position.y) // Only respond to mouse click below the player
-                {
-                    canJump = true; // Allow jumping after first click
-                    rb.gravityScale = gravityScale; // Enable gravity after first input
-                    Jump(mousePosition); // Perform the jump
-                }
-            }
         }
         else
         {
@@ -104,16 +94,6 @@ public class PlayerController : MonoBehaviour
                     }
                 }
             }
-
-            // Check for mouse input (for testing on desktop)
-            if (Input.GetMouseButtonDown(0)) // Left mouse button
-            {
-                Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition); // Convert mouse position to world coordinates
-                if (mousePosition.y < rb.position.y) // Only respond to mouse click below the player
-                {
-                    Jump(mousePosition);
-                }
-            }
         }
 
         // Keep the player within horizontal bounds (left and right)
@@ -126,7 +106,7 @@ public class PlayerController : MonoBehaviour
         FlipSpriteBasedOnDirection();
     }
 
-    void Jump(Vector2 inputPosition)
+    public void Jump(Vector2 inputPosition)
     {
         // Get the positions of the empty GameObjects
         Vector2 pointA = pointAObject.transform.position;
@@ -168,6 +148,8 @@ public class PlayerController : MonoBehaviour
 
         // Apply force in the calculated direction
         rb.velocity = jumpDirection * jumpForce;
+
+        jumps++;
     }
 
     Vector2 GetClosestPoint(Vector2 inputPosition, Vector2 a, Vector2 b, Vector2 c)
