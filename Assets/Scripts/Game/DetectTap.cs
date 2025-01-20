@@ -82,6 +82,7 @@ public class DetectTapInput : MonoBehaviour
             }
         }
 
+        //Debug.Log(rotationEuler);
         //previousAcceleration = acceleration;
     }
 }

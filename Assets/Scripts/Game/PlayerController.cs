@@ -60,7 +60,7 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        // Check if the first input has been received (either touch or mouse)
+        // Check if the player can jump
         if (!canJump)
         {
             // Check for touch input
@@ -73,8 +73,6 @@ public class PlayerController : MonoBehaviour
                     if (touchPosition.y < rb.position.y) // Only respond to touch below the player
                     {
                         canJump = true; // Allow jumping after first touch
-                        rb.gravityScale = gravityScale; // Enable gravity after first input
-                        Jump(touchPosition); // Perform the jump
                     }
                 }
             }
@@ -108,24 +106,20 @@ public class PlayerController : MonoBehaviour
 
     public void Jump(Vector2 inputPosition)
     {
+        // Enable gravity on the first jump
+        if (isFirstJump)
+        {
+            rb.gravityScale = gravityScale; // Activate gravity on the first jump
+            isFirstJump = false; // Mark the first jump as complete
+        }
+
         // Get the positions of the empty GameObjects
         Vector2 pointA = pointAObject.transform.position;
         Vector2 pointB = pointBObject.transform.position;
         Vector2 pointC = pointCObject.transform.position;
 
         // Determine the closest point to the input position
-        Vector2 closestPoint;
-
-        if (isFirstJump)
-        {
-            // Force the first jump to originate from Point B
-            closestPoint = pointB;
-            isFirstJump = false; // Mark the first jump as complete
-        }
-        else
-        {
-            closestPoint = GetClosestPoint(inputPosition, pointA, pointB, pointC);
-        }
+        Vector2 closestPoint = GetClosestPoint(inputPosition, pointA, pointB, pointC);
 
         // Calculate the jump direction based on the closest point and angle constraints
         Vector2 jumpDirection;
