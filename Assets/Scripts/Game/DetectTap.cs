@@ -4,9 +4,8 @@ using UnityEngine;
 public class DetectTapInput : MonoBehaviour
 {
     private Vector3 acceleration;
-    private Vector3 previousAcceleration;
-    public float tapThreshold = 0.5f; // Threshold for detecting sudden taps
-    public float lowPassFilterFactor = 0.1f; // Smoothing factor for accelerometer
+    public float tapThreshold = 0.5f; // detect spikes in acc
+    public float lowPassFilterFactor = 0.1f; // smooth for sensitivity
     private Vector3 smoothedAcceleration;
 
     // bounds for how much the gyroscope moved to detect directional tap
@@ -16,7 +15,7 @@ public class DetectTapInput : MonoBehaviour
     public float left_bound_upper = 271f;
 
     private float timeSinceLastTap = 0f;
-    private float tapCooldown = 0.5f; // Prevent multiple detections for a single tap
+    private float tapCooldown = 0.5f; 
 
     private float bottomQuarterY;
 

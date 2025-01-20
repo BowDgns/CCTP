@@ -23,47 +23,46 @@ public class PlayerController : MonoBehaviour
     private bool canJump = false; // Flag to determine if the player can jump
     private bool isFirstJump = true; // Flag to track if it's the first jump
 
-    // References to the empty GameObjects
-    public GameObject pointAObject; // First empty GameObject
-    public GameObject pointBObject; // Second empty GameObject
-    public GameObject pointCObject; // Third empty GameObject
+    // points to jump away from
+    public GameObject pointAObject;
+    public GameObject pointBObject; 
+    public GameObject pointCObject; 
 
     int jumps = 0;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        rb.gravityScale = 0f; // Disable gravity initially to keep the player still
+        rb.gravityScale = 0f; // set gravity to zero so the player doesnt fall before the first jump
 
         mainCamera = Camera.main;
 
-        // Calculate camera bounds in world space based on the camera's viewport
+        // get camera size for keeping player in bounds
         cameraWidth = mainCamera.orthographicSize * mainCamera.aspect;
 
-        // Get the SpriteRenderer component for the player
+        // get player sprite
         spriteRenderer = GetComponent<SpriteRenderer>();
         if (spriteRenderer != null && playerIdleSprite != null)
         {
-            spriteRenderer.sprite = playerIdleSprite; // Set the initial sprite to idle
+            spriteRenderer.sprite = playerIdleSprite; // set to idle
         }
 
-        // Get the SpriteRenderer component for the shadow object
+        // do the same for the shadow
         if (shadowObject != null)
         {
             shadowSpriteRenderer = shadowObject.GetComponent<SpriteRenderer>();
             if (shadowSpriteRenderer != null && shadowIdleSprite != null)
             {
-                shadowSpriteRenderer.sprite = shadowIdleSprite; // Set the shadow's initial sprite to idle
+                shadowSpriteRenderer.sprite = shadowIdleSprite; 
             }
         }
     }
 
     void Update()
     {
-        // Check if the player can jump
+        // can player jump (yes after first input)
         if (!canJump)
         {
-            // Check for touch input
             if (Input.touchCount > 0)
             {
                 Touch touch = Input.GetTouch(0); // Get the first touch
@@ -94,13 +93,11 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        // Keep the player within horizontal bounds (left and right)
+        // keep the player within the screen bounds
         KeepPlayerInBounds();
 
-        // Update the sprite based on vertical movement
+        // update the sprite and shadow
         UpdateSpriteBasedOnMovement();
-
-        // Flip the sprite and the shadow if needed
         FlipSpriteBasedOnDirection();
     }
 
@@ -113,30 +110,29 @@ public class PlayerController : MonoBehaviour
             isFirstJump = false; // Mark the first jump as complete
         }
 
-        // Get the positions of the empty GameObjects
+        // changed jumping to jump away from certain points (for tap input)
+        // simulate more random and directional jumps from doing it between two andgles
+
+        // positions to jump away from
         Vector2 pointA = pointAObject.transform.position;
         Vector2 pointB = pointBObject.transform.position;
         Vector2 pointC = pointCObject.transform.position;
 
-        // Determine the closest point to the input position
+        // choose closest point from the three points
         Vector2 closestPoint = GetClosestPoint(inputPosition, pointA, pointB, pointC);
 
-        // Calculate the jump direction based on the closest point and angle constraints
         Vector2 jumpDirection;
 
         if (closestPoint == (Vector2)pointAObject.transform.position)
         {
-            // Point A: Jump between 15° and 45°
             jumpDirection = CalculateJumpDirection(rb.position, closestPoint, -30f, -45f);
         }
         else if (closestPoint == (Vector2)pointBObject.transform.position)
         {
-            // Point B: Jump between -15° and 15°
             jumpDirection = CalculateJumpDirection(rb.position, closestPoint, -5f, 5f);
         }
-        else // Point C
+        else 
         {
-            // Point C: Jump between -15° and -45°
             jumpDirection = CalculateJumpDirection(rb.position, closestPoint, 45f, 35f);
         }
 
