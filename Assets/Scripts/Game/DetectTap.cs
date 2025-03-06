@@ -66,17 +66,17 @@ public class DetectTapInput : MonoBehaviour
             // Detect tilt based on the X-axis (for left-right motion)
             if (rotationEuler.x > right_bound_lower && rotationEuler.x < right_bound_upper) // Device tilted to the right (portrait view)
             {
-                playerController.Jump(Vector2.right);
+                //playerController.Jump(Vector2.right);
                 Debug.Log($"Tap to the right");
             }
             else if (rotationEuler.x < left_bound_lower && rotationEuler.x > left_bound_upper) // Device tilted to the left (portrait view)
             {
-                playerController.Jump(Vector2.left);
+                //playerController.Jump(Vector2.left);
                 Debug.Log($"Tap to the left");
             }
             else
             {
-                playerController.Jump(Vector2.zero);
+                //playerController.Jump(Vector2.zero);
                 Debug.Log($"Tap center");
             }
         }
