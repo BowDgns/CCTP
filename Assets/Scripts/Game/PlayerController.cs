@@ -48,7 +48,7 @@ public class PlayerController : MonoBehaviour
         }
 
         // Start player in the center
-        rb.position = Vector2.zero;
+        //rb.position = Vector2.zero;
         currentJumpPoint = Vector2.zero; // Default to center
     }
 

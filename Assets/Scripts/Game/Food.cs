@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Enemy : MonoBehaviour
+public class Food : MonoBehaviour
 {
     private float lowerBound;
 
@@ -9,7 +9,7 @@ public class Enemy : MonoBehaviour
         // Get the camera's lower Y position dynamically
         lowerBound = Camera.main.transform.position.y - Camera.main.orthographicSize;
 
-        // Destroy if the enemy moves below the lower bound
+        // Destroy if the food moves below the lower bound
         if (transform.position.y < lowerBound - 3)
         {
             Destroy(gameObject);
@@ -23,7 +23,10 @@ public class Enemy : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             // Print message to the console
-            Debug.Log("Hit enemy");
+            Debug.Log("Eaten food");
+
+            // Destroy this food object
+            Destroy(gameObject);
         }
     }
 }
