@@ -2,83 +2,90 @@ using UnityEngine;
 
 public class ScrollingBackground : MonoBehaviour
 {
-    public GameObject[] backgrounds; // Array for your background objects
-    public Transform player; // Reference to the player object
-    public float scrollSpeedMultiplier = 1f; // Speed multiplier based on player movement
-    private float backgroundHeight; // Height of the background image
+    public GameObject[] backgrounds; // Background objects
+    public Transform player; // Player reference
+    public float scrollSpeedMultiplier = 1f; // Adjust scrolling speed
+    private float backgroundHeight; // Height of a single background
     private Camera mainCamera;
-    private Vector3 lastPlayerPosition; // To track the player's last position
-    private float playerMovementDelta; // Player movement difference since the last frame
+    private Vector3 lastPlayerPosition;
 
     void Start()
     {
         mainCamera = Camera.main;
-
-        // Calculate the height of the background sprite based on its size and scale
         backgroundHeight = backgrounds[0].GetComponent<SpriteRenderer>().bounds.size.y;
-
-        // Store the initial player position
         lastPlayerPosition = player.position;
     }
 
     void Update()
     {
-        // Calculate how much the player has moved since the last frame
-        playerMovementDelta = player.position.y - lastPlayerPosition.y;
+        float playerMovementDelta = player.position.y - lastPlayerPosition.y;
 
-        // Move the backgrounds only if the player has moved
-        if (Mathf.Abs(playerMovementDelta) > 0.01f) // A small threshold to ignore tiny movements
+        if (Mathf.Abs(playerMovementDelta) > 0.01f) // Ignore tiny movements
         {
             foreach (GameObject bg in backgrounds)
             {
-                // Move the background based on player movement
                 bg.transform.position += Vector3.down * playerMovementDelta * scrollSpeedMultiplier;
-
-                // Handle upward or downward repositioning
-                if (bg.transform.position.y <= mainCamera.transform.position.y - backgroundHeight)
-                {
-                    RepositionBackgroundAbove(bg); // Reposition above when moving down
-                }
-                else if (bg.transform.position.y >= mainCamera.transform.position.y + backgroundHeight)
-                {
-                    RepositionBackgroundBelow(bg); // Reposition below when moving up
-                }
             }
+
+            // Handle both upward and downward repositioning
+            CheckAndRepositionBackgrounds();
         }
 
-        // Update the player's last position
         lastPlayerPosition = player.position;
     }
 
-    void RepositionBackgroundAbove(GameObject bg)
+    void CheckAndRepositionBackgrounds()
     {
-        // Find the highest background and place this one above it
-        float highestY = backgrounds[0].transform.position.y;
-        foreach (GameObject otherBg in backgrounds)
+        // Sort backgrounds based on their Y position
+        System.Array.Sort(backgrounds, (a, b) => a.transform.position.y.CompareTo(b.transform.position.y));
+
+        GameObject lowestBG = backgrounds[0];
+        GameObject highestBG = backgrounds[backgrounds.Length - 1];
+
+        // Move background UP if the lowest one moves too far down
+        if (lowestBG.transform.position.y <= mainCamera.transform.position.y - backgroundHeight)
         {
-            if (otherBg.transform.position.y > highestY)
-            {
-                highestY = otherBg.transform.position.y;
-            }
+            lowestBG.transform.position = new Vector3(
+                highestBG.transform.position.x,
+                highestBG.transform.position.y + backgroundHeight,
+                highestBG.transform.position.z
+            );
+            ShiftArrayLeft();
         }
 
-        // Reposition this background above the highest one
-        bg.transform.position = new Vector3(bg.transform.position.x, highestY + backgroundHeight, bg.transform.position.z);
+        // Move background DOWN if the highest one moves too far up
+        if (highestBG.transform.position.y >= mainCamera.transform.position.y + backgroundHeight)
+        {
+            highestBG.transform.position = new Vector3(
+                lowestBG.transform.position.x,
+                lowestBG.transform.position.y - backgroundHeight,
+                lowestBG.transform.position.z
+            );
+            ShiftArrayRight();
+        }
     }
 
-    void RepositionBackgroundBelow(GameObject bg)
+    void ShiftArrayLeft()
     {
-        // Find the lowest background and place this one below it
-        float lowestY = backgrounds[0].transform.position.y;
-        foreach (GameObject otherBg in backgrounds)
+        GameObject first = backgrounds[0];
+
+        for (int i = 0; i < backgrounds.Length - 1; i++)
         {
-            if (otherBg.transform.position.y < lowestY)
-            {
-                lowestY = otherBg.transform.position.y;
-            }
+            backgrounds[i] = backgrounds[i + 1];
         }
 
-        // Reposition this background below the lowest one
-        bg.transform.position = new Vector3(bg.transform.position.x, lowestY - backgroundHeight, bg.transform.position.z);
+        backgrounds[backgrounds.Length - 1] = first;
+    }
+
+    void ShiftArrayRight()
+    {
+        GameObject last = backgrounds[backgrounds.Length - 1];
+
+        for (int i = backgrounds.Length - 1; i > 0; i--)
+        {
+            backgrounds[i] = backgrounds[i - 1];
+        }
+
+        backgrounds[0] = last;
     }
 }

@@ -64,21 +64,45 @@ public class PlayerController : MonoBehaviour
                 float screenCenterX = mainCamera.pixelWidth / 2f;
                 if (touchPosition.x < screenCenterX) // Left side
                 {
+                    Debug.Log("tapped left");
                     canJump = true;
                     currentJumpPoint = pointAObject.transform.position; // Set to left point
                 }
                 else // Right side
                 {
+                    Debug.Log("tapped right");
                     canJump = true;
                     currentJumpPoint = pointBObject.transform.position; // Set to right point
                 }
             }
         }
+
         else if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
         {
             Vector2 touchPosition = Camera.main.ScreenToWorldPoint(Input.GetTouch(0).position);
             Jump(touchPosition);
         }
+
+        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
+        {
+            Vector2 touchPosition = Input.GetTouch(0).position;  // Use screen coordinates directly
+
+            // Determine if the touch is on the left or right side of the screen
+            float screenCenterX = Screen.width / 2f;  // Use Screen.width instead of Camera.main.pixelWidth
+            if (touchPosition.x < screenCenterX)  // Left side
+            {
+                Debug.Log("tapped left");
+                canJump = true;
+                currentJumpPoint = pointAObject.transform.position;  // Set to left point
+            }
+            else  // Right side
+            {
+                Debug.Log("tapped right");
+                canJump = true;
+                currentJumpPoint = pointBObject.transform.position;  // Set to right point
+            }
+        }
+
 
         KeepPlayerInBounds();
         UpdateSpriteBasedOnMovement();
@@ -104,7 +128,7 @@ public class PlayerController : MonoBehaviour
 
         // If the touch is on the same side as the current jump point, jump straight up
         // Otherwise, switch sides
-        if ((inputPosition.x < 0 && currentJumpPoint == leftPoint) || (inputPosition.x >= 0 && currentJumpPoint == rightPoint))
+        if ((currentJumpPoint == leftPoint) || (currentJumpPoint == rightPoint))
         {
             rb.velocity = Vector2.up * jumpForce;
         }
