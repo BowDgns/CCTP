@@ -9,9 +9,11 @@ public class Spawner : MonoBehaviour
     public float spawn_offset = 2f; // (above camera)
     public float spawnRadius = 1f; // The radius to check for nearby enemies to avoid overlap
     public int maxAttempts = 5; // Maximum attempts to find a non-overlapping spawn location
+    public int maxEnemies = 10; // Maximum number of enemies allowed at once
 
     private float next_spawn;
     private Camera mainCamera;
+    private int currentEnemyCount = 0;
 
     void Start()
     {
@@ -20,7 +22,7 @@ public class Spawner : MonoBehaviour
 
     void Update()
     {
-        if (Time.time > next_spawn)
+        if (Time.time > next_spawn && currentEnemyCount < maxEnemies)
         {
             SpawnEnemy();
             next_spawn = Time.time + spawn_rate;
@@ -36,17 +38,14 @@ public class Spawner : MonoBehaviour
         for (int attempt = 0; attempt < maxAttempts; attempt++)
         {
             float randomX = Random.Range(-range, range);
-
-            // Get the top of the camera's view
             float spawnY = mainCamera.transform.position.y + (mainCamera.orthographicSize + spawn_offset);
-
             spawnPosition = new Vector2(randomX, spawnY);
 
             // Check if the spawn position overlaps with existing enemies
             if (!IsOverlapping(spawnPosition))
             {
                 validPositionFound = true;
-                break; // Position is valid, break out of the loop
+                break;
             }
         }
 
@@ -54,6 +53,7 @@ public class Spawner : MonoBehaviour
         if (validPositionFound)
         {
             Instantiate(prefab, spawnPosition, Quaternion.identity);
+            currentEnemyCount++;
         }
         else
         {
@@ -67,12 +67,17 @@ public class Spawner : MonoBehaviour
         Collider2D[] colliders = Physics2D.OverlapCircleAll(spawnPosition, spawnRadius);
         foreach (var collider in colliders)
         {
-            // Check if the collider is an enemy (you can use a tag, layer, or compare the object type)
             if (collider.gameObject.CompareTag("Enemy") || collider.gameObject.CompareTag("Food"))
             {
-                return true; // Overlap found
+                return true;
             }
         }
-        return false; // No overlap
+        return false;
+    }
+
+    // Call this method when an enemy is destroyed
+    public void OnEnemyDestroyed()
+    {
+        currentEnemyCount = Mathf.Max(0, currentEnemyCount - 1);
     }
 }

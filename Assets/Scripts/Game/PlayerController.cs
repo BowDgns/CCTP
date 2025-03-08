@@ -25,6 +25,7 @@ public class PlayerController : MonoBehaviour
     private bool isFirstJump = true;
     private Vector2 currentJumpPoint; // Stores the current jump point for vertical jumps
 
+    private bool tapped_left = true;
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -54,63 +55,69 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        // first jump
+        // - determine which side to jump towards
+        // - allow gravity
         if (!canJump)
         {
             if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
             {
                 Vector2 touchPosition = Camera.main.ScreenToWorldPoint(Input.GetTouch(0).position);
 
-                // Determine if the touch is on the left or right side of the screen
+                // check which side of the screen is pressed
                 float screenCenterX = mainCamera.pixelWidth / 2f;
-                if (touchPosition.x < screenCenterX) // Left side
+
+                if (touchPosition.x < screenCenterX) // left
                 {
-                    Debug.Log("tapped left");
+                    Debug.Log("tapped left !");
+                    tapped_left = true;
                     canJump = true;
-                    currentJumpPoint = pointAObject.transform.position; // Set to left point
+                    currentJumpPoint = pointAObject.transform.position;
                 }
-                else // Right side
+                else // right
                 {
-                    Debug.Log("tapped right");
+                    tapped_left = false;
+                    Debug.Log("tapped right !");
                     canJump = true;
-                    currentJumpPoint = pointBObject.transform.position; // Set to right point
+                    currentJumpPoint = pointBObject.transform.position; 
                 }
             }
         }
 
-        else if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
-        {
-            Vector2 touchPosition = Camera.main.ScreenToWorldPoint(Input.GetTouch(0).position);
-            Jump(touchPosition);
-        }
+        // same logic for all jumps except no change in gravity
 
         if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
         {
-            Vector2 touchPosition = Input.GetTouch(0).position;  // Use screen coordinates directly
+            Vector2 touchPosition = Input.GetTouch(0).position;
 
-            // Determine if the touch is on the left or right side of the screen
-            float screenCenterX = Screen.width / 2f;  // Use Screen.width instead of Camera.main.pixelWidth
-            if (touchPosition.x < screenCenterX)  // Left side
+            // check which side of the screen is pressed
+            float screenCenterX = Screen.width / 2f;
+
+            if (touchPosition.x < screenCenterX)  // left
             {
                 Debug.Log("tapped left");
+                tapped_left = true;
                 canJump = true;
-                currentJumpPoint = pointAObject.transform.position;  // Set to left point
+                currentJumpPoint = pointAObject.transform.position;
+                Jump(true); // Set to left point
             }
-            else  // Right side
+            else  // right
             {
                 Debug.Log("tapped right");
+                tapped_left = false;
                 canJump = true;
-                currentJumpPoint = pointBObject.transform.position;  // Set to right point
+                currentJumpPoint = pointBObject.transform.position;  
+                Jump(false);
             }
         }
 
-
         KeepPlayerInBounds();
-        UpdateSpriteBasedOnMovement();
-        FlipSpriteBasedOnDirection();
+        AnimatePlayer();
+        FlipPlayer();
     }
 
 
-    void Jump(Vector2 inputPosition)
+    void Jump(bool jump_left)   // true = player wants to jump on the left side, false means player wants to jump on the right
     {
         if (isFirstJump)
         {
@@ -121,22 +128,34 @@ public class PlayerController : MonoBehaviour
         Vector2 leftPoint = pointAObject.transform.position;
         Vector2 rightPoint = pointBObject.transform.position;
 
-        if (currentJumpPoint == Vector2.zero) // First jump determines side
-        {
-            currentJumpPoint = inputPosition.x < 0 ? leftPoint : rightPoint;
-        }
-
         // If the touch is on the same side as the current jump point, jump straight up
         // Otherwise, switch sides
-        if ((currentJumpPoint == leftPoint) || (currentJumpPoint == rightPoint))
+
+        // continue upwards
+        if(jump_left && currentJumpPoint == leftPoint)
         {
+            Debug.Log("Jumping upwards");
             rb.velocity = Vector2.up * jumpForce;
         }
+        if (!jump_left && currentJumpPoint == rightPoint)
+        {
+            Debug.Log("Jumping upwards");
+            rb.velocity = Vector2.up * jumpForce;
+        }
+
+        // switch sides
+        if (jump_left && currentJumpPoint == rightPoint)
+        {
+            Debug.Log("Swapping sides");
+            rb.velocity = (currentJumpPoint - rb.position).normalized * jumpForce;
+        }
+        /*
         else
         {
             currentJumpPoint = currentJumpPoint == leftPoint ? rightPoint : leftPoint;
             rb.velocity = (currentJumpPoint - rb.position).normalized * jumpForce;
         }
+        */
     }
 
     void KeepPlayerInBounds()
@@ -155,7 +174,7 @@ public class PlayerController : MonoBehaviour
         rb.position = playerPosition;
     }
 
-    void UpdateSpriteBasedOnMovement()
+    void AnimatePlayer()
     {
         if (spriteRenderer != null && shadowSpriteRenderer != null)
         {
@@ -172,7 +191,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void FlipSpriteBasedOnDirection()
+    void FlipPlayer()
     {
         if (spriteRenderer != null && shadowSpriteRenderer != null)
         {
