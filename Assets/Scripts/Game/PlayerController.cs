@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -15,6 +16,11 @@ public class PlayerController : MonoBehaviour
     private float camera_width;
 
     private bool first_jump = true;
+
+    public Image stamina_bar;
+    public float stamina;
+    public float max_stamina;
+    public float jump_cost;
 
     // animation and shadows
     public Sprite player_jump_sprite;
@@ -78,6 +84,13 @@ public class PlayerController : MonoBehaviour
         KeepPlayerInBounds();
         AnimatePlayer();
         FlipPlayer();
+
+        if(stamina < 0)
+        {
+            stamina = 0;
+        }
+
+        stamina_bar.fillAmount = stamina / max_stamina;
     }
 
     // bug with jumping right first keeps you going straight
@@ -107,6 +120,8 @@ public class PlayerController : MonoBehaviour
 
             rb.velocity = jumpDirection * jump_force;
         }
+
+        stamina -= jump_cost;
     }
 
 
@@ -159,4 +174,5 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
+
 }

@@ -4,6 +4,8 @@ public class Food : MonoBehaviour
 {
     private float lowerBound;
 
+    public float add_stamina;
+
     void Update()
     {
         // Get the camera's lower Y position dynamically
