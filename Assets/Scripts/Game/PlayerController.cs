@@ -2,89 +2,59 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public float jumpForce = 10f; // Jump force
-    public float gravityScale = 1f; // Gravity for Rigidbody2D
-    public float screenPadding = 0.1f; // Screen padding to keep player in bounds
+    public float jump_force = 10f;
+    public float gravity = 1f;
+    public float screen_padding = 0.1f; // padding for how far the player can jump from the screen
 
-    public Sprite playerJumpingSprite;
-    public Sprite playerIdleSprite;
-    public Sprite shadowJumpingSprite;
-    public Sprite shadowIdleSprite;
-
-    public GameObject shadowObject; // Shadow reference
-    public GameObject pointAObject; // Left jump point
-    public GameObject pointBObject; // Right jump point
+    // points for the player to jump towards
+    public GameObject left_point; 
+    public GameObject right_point; 
 
     private Rigidbody2D rb;
     private Camera mainCamera;
-    private float cameraWidth;
-    private SpriteRenderer spriteRenderer;
-    private SpriteRenderer shadowSpriteRenderer;
+    private float camera_width;
 
-    private bool canJump = false;
-    private bool isFirstJump = true;
-    private Vector2 currentJumpPoint; // Stores the current jump point for vertical jumps
+    private bool first_jump = true;
 
-    private bool tapped_left = true;
+    // animation and shadows
+    public Sprite player_jump_sprite;
+    public Sprite player_idle_sprite;
+    public Sprite shadow_jump_sprite;
+    public Sprite shadow_idle_sprite;
+
+    private SpriteRenderer sprite_renderer;
+    private SpriteRenderer shadow_sprite_renderer;
+
+    public GameObject shadowObject;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        rb.gravityScale = 0f; // Disable gravity initially
-        mainCamera = Camera.main;
-        cameraWidth = mainCamera.orthographicSize * mainCamera.aspect;
+        rb.gravityScale = 0f; // set gravity to 0 so the player doesnt fall before the game starts
 
-        spriteRenderer = GetComponent<SpriteRenderer>();
-        if (spriteRenderer != null && playerIdleSprite != null)
+        // get values to ensure player doesnt go off screen 
+        mainCamera = Camera.main;
+        camera_width = mainCamera.orthographicSize * mainCamera.aspect;
+
+        sprite_renderer = GetComponent<SpriteRenderer>();
+        if (sprite_renderer != null && player_idle_sprite != null)
         {
-            spriteRenderer.sprite = playerIdleSprite;
+            sprite_renderer.sprite = player_idle_sprite;
         }
 
         if (shadowObject != null)
         {
-            shadowSpriteRenderer = shadowObject.GetComponent<SpriteRenderer>();
-            if (shadowSpriteRenderer != null && shadowIdleSprite != null)
+            shadow_sprite_renderer = shadowObject.GetComponent<SpriteRenderer>();
+            if (shadow_sprite_renderer != null && shadow_idle_sprite != null)
             {
-                shadowSpriteRenderer.sprite = shadowIdleSprite;
+                shadow_sprite_renderer.sprite = shadow_idle_sprite;
             }
         }
-
-        // Start player in the center
-        //rb.position = Vector2.zero;
-        currentJumpPoint = Vector2.zero; // Default to center
     }
 
     void Update()
     {
-        // first jump
-        // - determine which side to jump towards
-        // - allow gravity
-        if (!canJump)
-        {
-            if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
-            {
-                Vector2 touchPosition = Camera.main.ScreenToWorldPoint(Input.GetTouch(0).position);
-
-                // check which side of the screen is pressed
-                float screenCenterX = mainCamera.pixelWidth / 2f;
-
-                if (touchPosition.x < screenCenterX) // left
-                {
-                    Debug.Log("tapped left !");
-                    tapped_left = true;
-                    canJump = true;
-                    currentJumpPoint = pointAObject.transform.position;
-                }
-                else // right
-                {
-                    tapped_left = false;
-                    Debug.Log("tapped right !");
-                    canJump = true;
-                    currentJumpPoint = pointBObject.transform.position; 
-                }
-            }
-        }
-
-        // same logic for all jumps except no change in gravity
+        // get touch screen input to determine where to jump from
 
         if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
         {
@@ -96,18 +66,12 @@ public class PlayerController : MonoBehaviour
             if (touchPosition.x < screenCenterX)  // left
             {
                 Debug.Log("tapped left");
-                tapped_left = true;
-                canJump = true;
-                currentJumpPoint = pointAObject.transform.position;
-                Jump(true); // Set to left point
+                Jump(true); // set to left point
             }
             else  // right
             {
                 Debug.Log("tapped right");
-                tapped_left = false;
-                canJump = true;
-                currentJumpPoint = pointBObject.transform.position;  
-                Jump(false);
+                Jump(false); // set to right
             }
         }
 
@@ -116,59 +80,47 @@ public class PlayerController : MonoBehaviour
         FlipPlayer();
     }
 
-
-    void Jump(bool jump_left)   // true = player wants to jump on the left side, false means player wants to jump on the right
+    // bug with jumping right first keeps you going straight
+    void Jump(bool jump_left) // true = left tap, false = right tap
     {
-        if (isFirstJump)
+        if (first_jump)
         {
-            rb.gravityScale = gravityScale;
-            isFirstJump = false;
+            rb.gravityScale = gravity;
+            first_jump = false;
         }
 
-        Vector2 leftPoint = pointAObject.transform.position;
-        Vector2 rightPoint = pointBObject.transform.position;
+        float screenCenterX = Screen.width / 2f;    // center of screen
+        float playerScreenX = Camera.main.WorldToScreenPoint(transform.position).x; // where player is on screen
 
-        // If the touch is on the same side as the current jump point, jump straight up
-        // Otherwise, switch sides
+        bool playerOnLeftScreen = playerScreenX < screenCenterX;
 
-        // continue upwards
-        if(jump_left && currentJumpPoint == leftPoint)
+        if ((jump_left && playerOnLeftScreen) || (!jump_left && !playerOnLeftScreen))   // on the same side so jump straight up
         {
             Debug.Log("Jumping upwards");
-            rb.velocity = Vector2.up * jumpForce;
+            rb.velocity = Vector2.up * jump_force;
         }
-        if (!jump_left && currentJumpPoint == rightPoint)
-        {
-            Debug.Log("Jumping upwards");
-            rb.velocity = Vector2.up * jumpForce;
-        }
-
-        // switch sides
-        if (jump_left && currentJumpPoint == rightPoint)
+        else    // tap on opposite side, so jump over towards the jumping points.
         {
             Debug.Log("Swapping sides");
-            rb.velocity = (currentJumpPoint - rb.position).normalized * jumpForce;
+            Vector2 targetPosition = jump_left ? left_point.transform.position : right_point.transform.position;
+            Vector2 jumpDirection = (targetPosition - (Vector2)transform.position).normalized;
+
+            rb.velocity = jumpDirection * jump_force;
         }
-        /*
-        else
-        {
-            currentJumpPoint = currentJumpPoint == leftPoint ? rightPoint : leftPoint;
-            rb.velocity = (currentJumpPoint - rb.position).normalized * jumpForce;
-        }
-        */
     }
+
 
     void KeepPlayerInBounds()
     {
         Vector2 playerPosition = rb.position;
-        if (playerPosition.x - screenPadding < -cameraWidth)
+        if (playerPosition.x - screen_padding < -camera_width)
         {
-            playerPosition.x = -cameraWidth + screenPadding;
+            playerPosition.x = -camera_width + screen_padding;
             rb.velocity = new Vector2(-rb.velocity.x, rb.velocity.y);
         }
-        else if (playerPosition.x + screenPadding > cameraWidth)
+        else if (playerPosition.x + screen_padding > camera_width)
         {
-            playerPosition.x = cameraWidth - screenPadding;
+            playerPosition.x = camera_width - screen_padding;
             rb.velocity = new Vector2(-rb.velocity.x, rb.velocity.y);
         }
         rb.position = playerPosition;
@@ -176,34 +128,34 @@ public class PlayerController : MonoBehaviour
 
     void AnimatePlayer()
     {
-        if (spriteRenderer != null && shadowSpriteRenderer != null)
+        if (sprite_renderer != null && shadow_sprite_renderer != null)
         {
             if (rb.velocity.y > 0)
             {
-                spriteRenderer.sprite = playerJumpingSprite;
-                shadowSpriteRenderer.sprite = shadowJumpingSprite;
+                sprite_renderer.sprite = player_jump_sprite;
+                shadow_sprite_renderer.sprite = shadow_jump_sprite;
             }
             else
             {
-                spriteRenderer.sprite = playerIdleSprite;
-                shadowSpriteRenderer.sprite = shadowIdleSprite;
+                sprite_renderer.sprite = player_idle_sprite;
+                shadow_sprite_renderer.sprite = shadow_idle_sprite;
             }
         }
     }
 
     void FlipPlayer()
     {
-        if (spriteRenderer != null && shadowSpriteRenderer != null)
+        if (sprite_renderer != null && shadow_sprite_renderer != null)
         {
             if (rb.velocity.x > 0)
             {
-                spriteRenderer.flipX = false;
-                shadowSpriteRenderer.flipX = false;
+                sprite_renderer.flipX = false;
+                shadow_sprite_renderer.flipX = false;
             }
             else if (rb.velocity.x < 0)
             {
-                spriteRenderer.flipX = true;
-                shadowSpriteRenderer.flipX = true;
+                sprite_renderer.flipX = true;
+                shadow_sprite_renderer.flipX = true;
             }
         }
     }
