@@ -255,5 +255,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 482578c00e0c4374b9b4b77d4a6652dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  amplitude: 1
+  amplitude: 0.05
   frequency: 5

@@ -2,30 +2,27 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-    private float lowerBound;
-
-    void Update()
-    {
-        /*
-        // Get the camera's lower Y position dynamically
-        lowerBound = Camera.main.transform.position.y - Camera.main.orthographicSize;
-
-        // Destroy if the enemy moves below the lower bound
-        if (transform.position.y < lowerBound - 3)
-        {
-            Destroy(gameObject);
-        }
-        */
-    }
-
-    // Called when another collider enters this object's trigger zone
     private void OnTriggerEnter2D(Collider2D other)
     {
-        // Check if the object colliding is the player (you can tag or compare the object here)
         if (other.CompareTag("Player"))
         {
-            // Print message to the console
-            Debug.Log("Hit enemy");
+            Debug.Log("hit player");
+
+            // get player 
+            Rigidbody2D playerRb = other.GetComponent<Rigidbody2D>();
+
+            if (playerRb != null)
+            {
+                // disable the player controller so no more input can be done
+                PlayerController playerController = other.GetComponent<PlayerController>();
+                if (playerController != null)
+                {
+                    playerController.enabled = false;
+                }
+
+                // fall
+                playerRb.velocity = Vector2.zero;
+            }
         }
     }
 }

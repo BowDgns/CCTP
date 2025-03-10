@@ -2,33 +2,25 @@ using UnityEngine;
 
 public class Food : MonoBehaviour
 {
-    private float lowerBound;
+    public float add_stamina = 20f; // Amount of stamina to add when eaten
 
-    public float add_stamina;
-
-    void Update()
-    {
-        // Get the camera's lower Y position dynamically
-        lowerBound = Camera.main.transform.position.y - Camera.main.orthographicSize;
-
-        // Destroy if the food moves below the lower bound
-        if (transform.position.y < lowerBound - 3)
-        {
-            Destroy(gameObject);
-        }
-    }
-
-    // Called when another collider enters this object's trigger zone
     private void OnTriggerEnter2D(Collider2D other)
     {
-        // Check if the object colliding is the player (you can tag or compare the object here)
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("Player")) // Ensure the object has the "Player" tag
         {
-            // Print message to the console
-            Debug.Log("Eaten food");
+            Debug.Log("Food eaten!");
 
-            // Destroy this food object
-            Destroy(gameObject);
+            // Get the PlayerController component from the player
+            PlayerController player = other.GetComponent<PlayerController>();
+            if (player != null)
+            {
+                // Increase stamina and clamp it to max_stamina
+                player.stamina = Mathf.Min(player.stamina + add_stamina, player.max_stamina);
+
+                Debug.Log("New Stamina: " + player.stamina);
+            }
+
+            Destroy(gameObject); // Destroy the food object
         }
     }
 }

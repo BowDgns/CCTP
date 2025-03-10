@@ -70,15 +70,18 @@ public class PlayerController : MonoBehaviour
             // check which side of the screen is pressed
             float screenCenterX = Screen.width / 2f;
 
-            if (touchPosition.x < screenCenterX)  // left
+            if(stamina > 0)
             {
-                Debug.Log("tapped left");
-                Jump(true); // set to left point
-            }
-            else  // right
-            {
-                Debug.Log("tapped right");
-                Jump(false); // set to right
+                if (touchPosition.x < screenCenterX)  // left
+                {
+                    Debug.Log("tapped left");
+                    Jump(true); // set to left point
+                }
+                else  // right
+                {
+                    Debug.Log("tapped right");
+                    Jump(false); // set to right
+                }
             }
         }
 
