@@ -74,12 +74,12 @@ public class PlayerController : MonoBehaviour
             {
                 if (touchPosition.x < screenCenterX)  // left
                 {
-                    Debug.Log("tapped left");
+                    //Debug.Log("tapped left");
                     Jump(true); // set to left point
                 }
                 else  // right
                 {
-                    Debug.Log("tapped right");
+                    //Debug.Log("tapped right");
                     Jump(false); // set to right
                 }
             }
@@ -113,12 +113,12 @@ public class PlayerController : MonoBehaviour
 
         if ((jump_left && playerOnLeftScreen) || (!jump_left && !playerOnLeftScreen))   // on the same side so jump straight up
         {
-            Debug.Log("Jumping upwards");
+            //Debug.Log("jumping up");
             rb.velocity = Vector2.up * jump_force;
         }
         else    // tap on opposite side, so jump over towards the jumping points.
         {
-            Debug.Log("Swapping sides");
+            //Debug.Log("swap sides");
             Vector2 targetPosition = jump_left ? left_point.transform.position : right_point.transform.position;
             Vector2 jumpDirection = (targetPosition - (Vector2)transform.position).normalized;
 
@@ -128,7 +128,6 @@ public class PlayerController : MonoBehaviour
         stamina -= jump_cost;
         number_of_jumps++;
     }
-
 
     void KeepPlayerInBounds()
     {

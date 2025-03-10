@@ -2,25 +2,24 @@ using UnityEngine;
 
 public class Food : MonoBehaviour
 {
-    public float add_stamina = 20f; // Amount of stamina to add when eaten
+    public float add_stamina = 2f;
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("Player")) // Ensure the object has the "Player" tag
+        if (other.CompareTag("Player"))
         {
-            Debug.Log("Food eaten!");
+            Debug.Log("eaten food");
 
-            // Get the PlayerController component from the player
-            PlayerController player = other.GetComponent<PlayerController>();
+            PlayerController player = other.GetComponent<PlayerController>();   // get stamina from player controller s cript
             if (player != null)
             {
-                // Increase stamina and clamp it to max_stamina
-                player.stamina = Mathf.Min(player.stamina + add_stamina, player.max_stamina);
-
-                Debug.Log("New Stamina: " + player.stamina);
+                if(player.stamina < player.max_stamina)
+                {
+                    player.stamina += add_stamina;
+                }
             }
 
-            Destroy(gameObject); // Destroy the food object
+            Destroy(gameObject); // remove food
         }
     }
 }
