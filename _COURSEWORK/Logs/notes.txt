@@ -1,7 +1,8 @@
 
 Gameplay
 - jumping between the left and right side of screen (angle of gyroscope)
-- maybe also double jump? (Big spike in accelerometer)
+- maybe also double jump? (Big spike in accelerometer) 
+	- Use an item on double press  perchance
 
 Enemies
 Ghost
