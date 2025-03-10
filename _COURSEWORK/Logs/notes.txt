@@ -1,0 +1,42 @@
+
+Gameplay
+- jumping between the left and right side of screen (angle of gyroscope)
+- maybe also double jump? (Big spike in accelerometer)
+
+Enemies
+Ghost
+	- Moves up and down
+
+Swarm
+	- Flies across the screen
+
+
+Abilities
+Worm
+	- maybe u eat the worm and ur invincible ;/
+
+	or
+
+	- it doesnt do that?
+
+Lightning bold
+	- infinite stamina for a short time
+
+	or
+
+	- kys?
+
+
+
+
+
+
+
+Background stuff
+- moon
+- hot air balloon
+- more types of clouds
+- blue colour changes over time
+
+
+
