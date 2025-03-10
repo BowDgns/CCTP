@@ -16,6 +16,7 @@ public class PlayerController : MonoBehaviour
     private float camera_width;
 
     private bool first_jump = true;
+    public float number_of_jumps = 0;
 
     public Image stamina_bar;
     public float stamina;
@@ -122,6 +123,7 @@ public class PlayerController : MonoBehaviour
         }
 
         stamina -= jump_cost;
+        number_of_jumps++;
     }
 
 

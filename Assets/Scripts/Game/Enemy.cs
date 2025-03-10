@@ -6,6 +6,7 @@ public class Enemy : MonoBehaviour
 
     void Update()
     {
+        /*
         // Get the camera's lower Y position dynamically
         lowerBound = Camera.main.transform.position.y - Camera.main.orthographicSize;
 
@@ -14,6 +15,7 @@ public class Enemy : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        */
     }
 
     // Called when another collider enters this object's trigger zone
