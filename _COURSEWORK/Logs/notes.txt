@@ -36,7 +36,11 @@ Background stuff
 - moon
 - hot air balloon
 - more types of clouds
+
 - blue colour changes over time
+- water section
+- space section
+- sky section
 
 
 

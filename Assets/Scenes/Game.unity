@@ -852,6 +852,7 @@ GameObject:
   - component: {fileID: 674626732}
   - component: {fileID: 674626731}
   - component: {fileID: 674626733}
+  - component: {fileID: 674626734}
   m_Layer: 0
   m_Name: Spawners
   m_TagString: Untagged
@@ -913,6 +914,26 @@ MonoBehaviour:
   spawn_offset: 3
   spawnRadius: 2
   maxAttempts: 1
+  maxEnemies: 10
+--- !u!114 &674626734
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 674626730}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 940c865def8617945b8ac44c1747794d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefab: {fileID: 7853224418208887517, guid: 40a2d139aeda51f4cac6409a339f4ddf, type: 3}
+  player: {fileID: 1504965684}
+  spawn_rate: 2
+  range: 3
+  spawn_offset: 2
+  spawnRadius: 1
+  maxAttempts: 5
   maxEnemies: 10
 --- !u!1001 &742439812
 PrefabInstance:
