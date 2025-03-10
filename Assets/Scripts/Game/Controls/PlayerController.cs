@@ -70,8 +70,6 @@ public class PlayerController : MonoBehaviour
             // check which side of the screen is pressed
             float screenCenterX = Screen.width / 2f;
 
-            if(stamina > 0)
-            {
                 if (touchPosition.x < screenCenterX)  // left
                 {
                     //Debug.Log("tapped left");
@@ -82,7 +80,7 @@ public class PlayerController : MonoBehaviour
                     //Debug.Log("tapped right");
                     Jump(false); // set to right
                 }
-            }
+            
         }
 
         KeepPlayerInBounds();
@@ -98,35 +96,38 @@ public class PlayerController : MonoBehaviour
     }
 
     // bug with jumping right first keeps you going straight
-    void Jump(bool jump_left) // true = left tap, false = right tap
+    public void Jump(bool jump_left) // true = left tap, false = right tap
     {
-        if (first_jump)
+        if (stamina > 0)
         {
-            rb.gravityScale = gravity;
-            first_jump = false;
+            if (first_jump)
+            {
+                rb.gravityScale = gravity;
+                first_jump = false;
+            }
+
+            float screenCenterX = Screen.width / 2f;    // center of screen
+            float playerScreenX = Camera.main.WorldToScreenPoint(transform.position).x; // where player is on screen
+
+            bool playerOnLeftScreen = playerScreenX < screenCenterX;
+
+            if ((jump_left && playerOnLeftScreen) || (!jump_left && !playerOnLeftScreen))   // on the same side so jump straight up
+            {
+                //Debug.Log("jumping up");
+                rb.velocity = Vector2.up * jump_force;
+            }
+            else    // tap on opposite side, so jump over towards the jumping points.
+            {
+                //Debug.Log("swap sides");
+                Vector2 targetPosition = jump_left ? left_point.transform.position : right_point.transform.position;
+                Vector2 jumpDirection = (targetPosition - (Vector2)transform.position).normalized;
+
+                rb.velocity = jumpDirection * jump_force;
+            }
+
+            stamina -= jump_cost;
+            number_of_jumps++;
         }
-
-        float screenCenterX = Screen.width / 2f;    // center of screen
-        float playerScreenX = Camera.main.WorldToScreenPoint(transform.position).x; // where player is on screen
-
-        bool playerOnLeftScreen = playerScreenX < screenCenterX;
-
-        if ((jump_left && playerOnLeftScreen) || (!jump_left && !playerOnLeftScreen))   // on the same side so jump straight up
-        {
-            //Debug.Log("jumping up");
-            rb.velocity = Vector2.up * jump_force;
-        }
-        else    // tap on opposite side, so jump over towards the jumping points.
-        {
-            //Debug.Log("swap sides");
-            Vector2 targetPosition = jump_left ? left_point.transform.position : right_point.transform.position;
-            Vector2 jumpDirection = (targetPosition - (Vector2)transform.position).normalized;
-
-            rb.velocity = jumpDirection * jump_force;
-        }
-
-        stamina -= jump_cost;
-        number_of_jumps++;
     }
 
     void KeepPlayerInBounds()

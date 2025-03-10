@@ -1,87 +1,119 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class DetectTapInput : MonoBehaviour
 {
     private Vector3 acceleration;
-    public float tapThreshold = 0.5f; // detect spikes in acc
-    public float lowPassFilterFactor = 0.1f; // smooth for sensitivity
+    public float tapThreshold = 0.5f; // detect spikes in acceleration
+    public float lowPassFilterFactor = 0.1f; // smooth sensitivity
     private Vector3 smoothedAcceleration;
 
-    // bounds for how much the gyroscope moved to detect directional tap
-    public float right_bound_lower = 1f;
-    public float right_bound_upper = 89f;
-    public float left_bound_lower = 359f;
-    public float left_bound_upper = 271f;
+    //bounds for left/right taps
+    private float right_bound_lower;
+    private float right_bound_upper;
+    private float left_bound_lower;
+    private float left_bound_upper;
 
     private float timeSinceLastTap = 0f;
-    private float tapCooldown = 0.5f; 
-
-    private float bottomQuarterY;
+    private float tapCooldown = 0.5f;
 
     public PlayerController playerController;
 
+    private bool isCalibrating = false;
+    private float leftMin = 360f, leftMax = 0f;
+    private float rightMin = 360f, rightMax = 0f;
+
     private void Start()
     {
-        // Enable the gyro if you need orientation data
         Input.gyro.enabled = true;
-
-        // Calculate Y position for the bottom quarter of the screen
-        bottomQuarterY = Screen.height / 4f;
-
-        // Initialize smoothed acceleration
         smoothedAcceleration = Input.acceleration;
-        //previousAcceleration = smoothedAcceleration;
     }
 
     private void Update()
     {
-        // Update time since last tap
         timeSinceLastTap += Time.deltaTime;
 
-        // Detect tap-like gestures from accelerometer
-        DetectTap();
+        if (isCalibrating)
+        {
+            CalibrateTaps();
+        }
+        else
+        {
+            DetectTap();
+        }
+    }
+
+    public void StartCalibration()
+    {
+        isCalibrating = true;
+        leftMin = 360f; leftMax = 0f;
+        rightMin = 360f; rightMax = 0f;
+        Debug.Log("Calibration started: Perform left and right taps.");
+    }
+
+    public void StopCalibration()
+    {
+        isCalibrating = false;
+
+        // Set bounds dynamically based on collected data
+        left_bound_lower = leftMin;
+        left_bound_upper = leftMax;
+        right_bound_lower = rightMin;
+        right_bound_upper = rightMax;
+
+        Debug.Log($"Calibration complete: Left [{left_bound_lower}, {left_bound_upper}], Right [{right_bound_lower}, {right_bound_upper}]");
+    }
+
+    private void CalibrateTaps()
+    {
+        Quaternion rotation = Input.gyro.attitude;
+        Vector3 rotationEuler = rotation.eulerAngles;
+
+        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
+        {
+            Debug.Log("Recording Calibration Tap...");
+
+            if (rotationEuler.x > 180) // Adjust if needed to fit your device orientation
+            {
+                leftMin = Mathf.Min(leftMin, rotationEuler.x);
+                leftMax = Mathf.Max(leftMax, rotationEuler.x);
+                Debug.Log($"Left Tap Recorded: {rotationEuler.x}");
+            }
+            else
+            {
+                rightMin = Mathf.Min(rightMin, rotationEuler.x);
+                rightMax = Mathf.Max(rightMax, rotationEuler.x);
+                Debug.Log($"Right Tap Recorded: {rotationEuler.x}");
+            }
+        }
     }
 
     private void DetectTap()
     {
-        // Get the current accelerometer data
         acceleration = Input.acceleration;
-
-        // Get the current rotation from the gyroscope
         Quaternion rotation = Input.gyro.attitude;
         Vector3 rotationEuler = rotation.eulerAngles;
 
-        // Apply low-pass filter to accelerometer data for smoothing
         smoothedAcceleration = Vector3.Lerp(smoothedAcceleration, acceleration, lowPassFilterFactor);
-
-        // Calculate the change in acceleration (delta) from the smoothed value
         Vector3 accelerationDelta = acceleration - smoothedAcceleration;
 
-        // If a significant change in acceleration is detected and the cooldown period has passed, it's a tap
         if (accelerationDelta.sqrMagnitude > (tapThreshold * tapThreshold) && timeSinceLastTap > tapCooldown)
         {
             timeSinceLastTap = 0f; // Reset cooldown
 
-            // Detect tilt based on the X-axis (for left-right motion)
-            if (rotationEuler.x > right_bound_lower && rotationEuler.x < right_bound_upper) // Device tilted to the right (portrait view)
+            if (rotationEuler.x > right_bound_lower && rotationEuler.x < right_bound_upper)
             {
-                //playerController.Jump(Vector2.right);
-                Debug.Log($"Tap to the right");
+                playerController.Jump(false);
+                Debug.Log("Tap to the right");
             }
-            else if (rotationEuler.x < left_bound_lower && rotationEuler.x > left_bound_upper) // Device tilted to the left (portrait view)
+            else if (rotationEuler.x < left_bound_lower && rotationEuler.x > left_bound_upper)
             {
-                //playerController.Jump(Vector2.left);
-                Debug.Log($"Tap to the left");
+                playerController.Jump(true);
+                Debug.Log("Tap to the left");
             }
             else
             {
-                //playerController.Jump(Vector2.zero);
-                Debug.Log($"Tap center");
+                Debug.Log("Tap center");
             }
         }
-
-        //Debug.Log(rotationEuler);
-        //previousAcceleration = acceleration;
     }
 }

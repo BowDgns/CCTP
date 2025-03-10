@@ -1936,6 +1936,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4577740399547385289, guid: 8337fce83a4d8ef4f98a58ed8d62ed0c, type: 3}
   m_PrefabInstance: {fileID: 415660188}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1504965685 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2956586822360656629, guid: 8337fce83a4d8ef4f98a58ed8d62ed0c, type: 3}
+  m_PrefabInstance: {fileID: 415660188}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33ff2faad35b6144c9a497d2b29d72dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &1581376573 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 889651279928126300, guid: d4d03e70b7ab0a941a93c1a6a3a525d0, type: 3}
@@ -2026,7 +2037,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1699884038
 Transform:
   m_ObjectHideFlags: 0
@@ -2056,11 +2067,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tapThreshold: 0.1
   lowPassFilterFactor: 0.2
-  right_bound_lower: 0.2
-  right_bound_upper: 85
-  left_bound_lower: 359.8
-  left_bound_upper: 180
-  playerController: {fileID: 0}
+  playerController: {fileID: 1504965685}
 --- !u!1 &1700497432
 GameObject:
   m_ObjectHideFlags: 0
