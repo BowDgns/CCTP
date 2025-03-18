@@ -1,20 +1,19 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;  // For UI Button
+using UnityEngine.UI; 
 
 public class SceneSwitcher : MonoBehaviour
 {
-    public Button switchButton;  // Reference to your button
+    public Button button;  
+    public string scene_name; 
 
     void Start()
-    {
-        // Add listener to the button to call the SwitchScene method when clicked
-        switchButton.onClick.AddListener(SwitchScene);
+    { 
+        button.onClick.AddListener(SwitchScene);
     }
 
     void SwitchScene()
     {
-        // Change "SceneName" to the name of the scene you want to load
-        SceneManager.LoadScene("Game");
+        SceneManager.LoadScene(scene_name);
     }
 }

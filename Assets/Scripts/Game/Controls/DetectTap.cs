@@ -26,66 +26,31 @@ public class DetectTapInput : MonoBehaviour
     {
         Input.gyro.enabled = true;
         smoothedAcceleration = Input.acceleration;
+
+        
+            if (PlayerPrefs.HasKey("left_bound_lower"))
+            {
+                float left_bound_lower = PlayerPrefs.GetFloat("left_bound_lower");
+                float left_bound_upper = PlayerPrefs.GetFloat("left_bound_upper");
+                float right_bound_lower = PlayerPrefs.GetFloat("right_bound_lower");
+                float right_bound_upper = PlayerPrefs.GetFloat("right_bound_upper");
+
+                Debug.Log($"Loaded Calibration: Left [{left_bound_lower}, {left_bound_upper}], Right [{right_bound_lower}, {right_bound_upper}]");
+            }
+            else
+            {
+                Debug.Log("No calibration data found. Please calibrate first.");
+            }
     }
 
     private void Update()
     {
         timeSinceLastTap += Time.deltaTime;
 
-        if (isCalibrating)
-        {
-            CalibrateTaps();
-        }
-        else
-        {
-            DetectTap();
-        }
+        DetectTap();
+        
     }
 
-    public void StartCalibration()
-    {
-        isCalibrating = true;
-        leftMin = 360f; leftMax = 0f;
-        rightMin = 360f; rightMax = 0f;
-        Debug.Log("Calibration started: Perform left and right taps.");
-    }
-
-    public void StopCalibration()
-    {
-        isCalibrating = false;
-
-        // Set bounds dynamically based on collected data
-        left_bound_lower = leftMin;
-        left_bound_upper = leftMax;
-        right_bound_lower = rightMin;
-        right_bound_upper = rightMax;
-
-        Debug.Log($"Calibration complete: Left [{left_bound_lower}, {left_bound_upper}], Right [{right_bound_lower}, {right_bound_upper}]");
-    }
-
-    private void CalibrateTaps()
-    {
-        Quaternion rotation = Input.gyro.attitude;
-        Vector3 rotationEuler = rotation.eulerAngles;
-
-        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
-        {
-            Debug.Log("Recording Calibration Tap...");
-
-            if (rotationEuler.x > 180) // Adjust if needed to fit your device orientation
-            {
-                leftMin = Mathf.Min(leftMin, rotationEuler.x);
-                leftMax = Mathf.Max(leftMax, rotationEuler.x);
-                Debug.Log($"Left Tap Recorded: {rotationEuler.x}");
-            }
-            else
-            {
-                rightMin = Mathf.Min(rightMin, rotationEuler.x);
-                rightMax = Mathf.Max(rightMax, rotationEuler.x);
-                Debug.Log($"Right Tap Recorded: {rotationEuler.x}");
-            }
-        }
-    }
 
     private void DetectTap()
     {
