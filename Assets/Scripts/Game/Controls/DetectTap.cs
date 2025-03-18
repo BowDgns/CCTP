@@ -65,20 +65,18 @@ public class DetectTapInput : MonoBehaviour
         {
             timeSinceLastTap = 0f; // Reset cooldown
 
-            if (rotationEuler.x > right_bound_lower && rotationEuler.x < right_bound_upper)
+            if (rotationEuler.x > right_bound_lower /*&& rotationEuler.x < right_bound_upper*/)
             {
                 playerController.Jump(false);
                 Debug.Log("Tap to the right");
             }
-            else if (rotationEuler.x < left_bound_lower && rotationEuler.x > left_bound_upper)
+            else if (rotationEuler.x < left_bound_lower /*&& rotationEuler.x > left_bound_upper*/)
             {
                 playerController.Jump(true);
                 Debug.Log("Tap to the left");
             }
-            else
-            {
-                Debug.Log("Tap center");
-            }
+
+            Debug.Log(rotationEuler.x);
         }
     }
 }

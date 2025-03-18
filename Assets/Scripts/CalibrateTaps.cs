@@ -13,7 +13,6 @@ public class CalibrateTaps : MonoBehaviour
     private float leftMin = 360f, leftMax = 0f;
     private float rightMin = 360f, rightMax = 0f;
 
-
     // polish
     public Rigidbody2D frog_left;
     public Rigidbody2D frog_right;
@@ -28,12 +27,22 @@ public class CalibrateTaps : MonoBehaviour
     public SpriteRenderer sprite_renderer_right;
     public SpriteRenderer shadow_sprite_renderer_right;
 
+    public GameObject back_button;
+
     public float jump_force = 5;
+    public float tapThreshold = 0.1f; // Detect spikes in acceleration
+    public float lowPassFilterFactor = 0.2f; // Smooth sensitivity
+    private Vector3 smoothedAcceleration;
+
+    private float timeSinceLastTap = 0f;
+    private float tapCooldown = 0.5f;
 
     private void Start()
     {
         Input.gyro.enabled = true;
+        smoothedAcceleration = Input.acceleration;
         UpdateCalibrationText("Tap right 3 times to calibrate.");
+        back_button.SetActive(false);
     }
 
     private void Update()
@@ -66,27 +75,33 @@ public class CalibrateTaps : MonoBehaviour
         PlayerPrefs.SetFloat("right_bound_upper", rightMax);
         PlayerPrefs.Save();
 
-        UpdateCalibrationText("Calibration complete!");
+        UpdateCalibrationText("Calibration complete! Press back to play.");
         Debug.Log($"Calibration saved: Left [{leftMin}, {leftMax}], Right [{rightMin}, {rightMax}]");
+        back_button.SetActive(true);
     }
 
     private void CalibrateTap()
     {
-        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
+        timeSinceLastTap += Time.deltaTime;
+
+        // Get the accelerometer values
+        Vector3 acceleration = Input.acceleration;
+        Quaternion rotation = Input.gyro.attitude;
+        Vector3 rotationEuler = rotation.eulerAngles;
+
+        smoothedAcceleration = Vector3.Lerp(smoothedAcceleration, acceleration, lowPassFilterFactor);
+        Vector3 accelerationDelta = acceleration - smoothedAcceleration;
+
+        if (accelerationDelta.sqrMagnitude > (tapThreshold * tapThreshold) && timeSinceLastTap > tapCooldown)
         {
-            Quaternion rotation = Input.gyro.attitude;
-            Vector3 rotationEuler = rotation.eulerAngles;
-            Debug.Log($"Recording Calibration Tap... Angle: {rotationEuler.x}");
+            timeSinceLastTap = 0f; // Reset cooldown
 
-            // Check if the frog is grounded (not jumping)
-            bool isGroundedLeft = Mathf.Abs(frog_left.velocity.y) < 0.1f;  // Adjust the threshold if necessary
-            bool isGroundedRight = Mathf.Abs(frog_right.velocity.y) < 0.1f; // Adjust the threshold if necessary
-
-            // Only allow right taps before left taps
-            if (rightTaps < 3 && isGroundedRight)
+            // Detect right tap
+            if (rightTaps < 3)
             {
                 rightMin = Mathf.Min(rightMin, rotationEuler.x);
                 rightMax = Mathf.Max(rightMax, rotationEuler.x);
+
                 rightTaps++;
 
                 // Apply jump force to the right frog
@@ -99,11 +114,12 @@ public class CalibrateTaps : MonoBehaviour
                     UpdateCalibrationText("Now tap left 3 times to calibrate.");
                 }
             }
-
-            else if (leftTaps < 3 && isGroundedLeft && rightTaps == 3) // Check if right taps are complete
+            // Detect left tap after right taps are complete
+            else if (leftTaps < 3 && rightTaps == 3)
             {
                 leftMin = Mathf.Min(leftMin, rotationEuler.x);
                 leftMax = Mathf.Max(leftMax, rotationEuler.x);
+
                 leftTaps++;
 
                 // Apply jump force to the left frog
@@ -118,7 +134,6 @@ public class CalibrateTaps : MonoBehaviour
             }
         }
     }
-
 
     private void UpdateCalibrationText(string message)
     {
