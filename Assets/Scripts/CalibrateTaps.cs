@@ -10,8 +10,8 @@ public class CalibrateTaps : MonoBehaviour
     public bool isCalibrating = true;
     private int rightTaps = 0;
     private int leftTaps = 0;
-    private float leftMin = 360f, leftMax = 0f;
-    private float rightMin = 360f, rightMax = 0f;
+    private float leftMin = 0f, leftMax = 0f;
+    private float rightMin = 0f, rightMax = 0f;
 
     // polish
     public Rigidbody2D frog_left;
@@ -51,6 +51,11 @@ public class CalibrateTaps : MonoBehaviour
         {
             CalibrateTap();
         }
+        
+        if(!isCalibrating)
+        {
+            //TestTaps();
+        }
 
         AnimatePlayer();
     }
@@ -69,14 +74,12 @@ public class CalibrateTaps : MonoBehaviour
     public void StopCalibration()
     {
         isCalibrating = false;
-        PlayerPrefs.SetFloat("left_bound_lower", leftMin);
-        PlayerPrefs.SetFloat("left_bound_upper", leftMax);
-        PlayerPrefs.SetFloat("right_bound_lower", rightMin);
-        PlayerPrefs.SetFloat("right_bound_upper", rightMax);
+        PlayerPrefs.SetFloat("left_bound_lower", leftMin / 3);
+        PlayerPrefs.SetFloat("right_bound_lower", rightMin / 3);
         PlayerPrefs.Save();
 
         UpdateCalibrationText("Calibration complete! Press back to play.");
-        Debug.Log($"Calibration saved: Left [{leftMin}, {leftMax}], Right [{rightMin}, {rightMax}]");
+        Debug.Log($"Calibration saved: Left [{leftMin / 3}, Right [{rightMin / 3}]");
         back_button.SetActive(true);
     }
 
@@ -99,15 +102,23 @@ public class CalibrateTaps : MonoBehaviour
             // Detect right tap
             if (rightTaps < 3)
             {
-                rightMin = Mathf.Min(rightMin, rotationEuler.x);
-                rightMax = Mathf.Max(rightMax, rotationEuler.x);
+                if(rotationEuler.x > 0.5f)
+                {
+                    rightMin += 0.5f;
+                }
+                else
+                {
+                    rightMin += rotationEuler.x;
+                }
+                
 
                 rightTaps++;
 
                 // Apply jump force to the right frog
                 frog_right.AddForce(Vector2.up * jump_force, ForceMode2D.Impulse);
 
-                UpdateCalibrationText($"Right Taps: {rightTaps}/3 - Angle: {rotationEuler.x}");
+                UpdateCalibrationText($"Right Taps: {rightMin / rightTaps}");
+                //UpdateCalibrationText($"Right Taps: {rightTaps}/3 - Angle: {rotationEuler.x}");
 
                 if (rightTaps == 3)
                 {
@@ -117,15 +128,22 @@ public class CalibrateTaps : MonoBehaviour
             // Detect left tap after right taps are complete
             else if (leftTaps < 3 && rightTaps == 3)
             {
-                leftMin = Mathf.Min(leftMin, rotationEuler.x);
-                leftMax = Mathf.Max(leftMax, rotationEuler.x);
+                if(rotationEuler.x < 358)
+                {
+                    leftMin += 359;
+                }
+                else
+                {
+                    leftMin += rotationEuler.x;
+                }
 
                 leftTaps++;
 
                 // Apply jump force to the left frog
                 frog_left.AddForce(Vector2.up * jump_force, ForceMode2D.Impulse);
 
-                UpdateCalibrationText($"Left Taps: {leftTaps}/3 - Angle: {rotationEuler.x}");
+                UpdateCalibrationText($"Left Taps: {leftMin / leftTaps}");
+                //UpdateCalibrationText($"Left Taps: {leftTaps}/3 - Angle: {rotationEuler.x}");
 
                 if (leftTaps == 3)
                 {
@@ -142,6 +160,38 @@ public class CalibrateTaps : MonoBehaviour
             calibrationText.text = message;
         }
     }
+
+    /*
+    private void TestTaps()
+    {
+        Vector3 acceleration = Input.acceleration;
+        Quaternion rotation = Input.gyro.attitude;
+        Vector3 rotationEuler = rotation.eulerAngles;
+        Vector3 accelerationDelta = acceleration - smoothedAcceleration;
+
+        if (accelerationDelta.sqrMagnitude > (tapThreshold * tapThreshold) && timeSinceLastTap > tapCooldown)
+        {
+            timeSinceLastTap = 0f;
+
+            Debug.Log("Tap detected");
+
+            if (rotationEuler.x > rightMin / 3 && rotationEuler.x < rightMax)
+            {
+                Debug.Log("Right tap registered!");
+                frog_right.AddForce(Vector2.up * jump_force, ForceMode2D.Impulse);
+            }
+            else if (rotationEuler.x < leftMin / 3 && rotationEuler.x > leftMax)
+            {
+                Debug.Log("Left tap registered!");
+                frog_left.AddForce(Vector2.up * jump_force, ForceMode2D.Impulse);
+            }
+            else
+            {
+                Debug.Log("No valid tap detected.");
+            }
+        }
+    }
+    */
 
     void AnimatePlayer()
     {

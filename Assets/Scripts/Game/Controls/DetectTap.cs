@@ -14,33 +14,30 @@ public class DetectTapInput : MonoBehaviour
     private float left_bound_upper;
 
     private float timeSinceLastTap = 0f;
-    private float tapCooldown = 0.5f;
+    private float tapCooldown = 0.2f;
 
     public PlayerController playerController;
-
-    private bool isCalibrating = false;
-    private float leftMin = 360f, leftMax = 0f;
-    private float rightMin = 360f, rightMax = 0f;
 
     private void Start()
     {
         Input.gyro.enabled = true;
         smoothedAcceleration = Input.acceleration;
 
-        
-            if (PlayerPrefs.HasKey("left_bound_lower"))
-            {
-                float left_bound_lower = PlayerPrefs.GetFloat("left_bound_lower");
-                float left_bound_upper = PlayerPrefs.GetFloat("left_bound_upper");
-                float right_bound_lower = PlayerPrefs.GetFloat("right_bound_lower");
-                float right_bound_upper = PlayerPrefs.GetFloat("right_bound_upper");
 
-                Debug.Log($"Loaded Calibration: Left [{left_bound_lower}, {left_bound_upper}], Right [{right_bound_lower}, {right_bound_upper}]");
-            }
-            else
-            {
-                Debug.Log("No calibration data found. Please calibrate first.");
-            }
+        if (PlayerPrefs.HasKey("left_bound_lower"))
+        {
+            left_bound_lower = PlayerPrefs.GetFloat("left_bound_lower");
+            right_bound_lower = PlayerPrefs.GetFloat("right_bound_lower");
+
+
+            Debug.Log($"Loaded Calibration: Left [{left_bound_lower}], Right [{right_bound_lower}]");
+        }
+        else
+        {
+            left_bound_lower = 359.5f;
+            right_bound_lower = 0.5f;
+            Debug.Log("No calibration data use default values");
+        }
     }
 
     private void Update()
@@ -65,12 +62,12 @@ public class DetectTapInput : MonoBehaviour
         {
             timeSinceLastTap = 0f; // Reset cooldown
 
-            if (rotationEuler.x > right_bound_lower /*&& rotationEuler.x < right_bound_upper*/)
+            if (rotationEuler.x > right_bound_lower - 0.1 && rotationEuler.x < 10)
             {
                 playerController.Jump(false);
                 Debug.Log("Tap to the right");
             }
-            else if (rotationEuler.x < left_bound_lower /*&& rotationEuler.x > left_bound_upper*/)
+            else if (rotationEuler.x < left_bound_lower + 0.1 && rotationEuler.x > 350)
             {
                 playerController.Jump(true);
                 Debug.Log("Tap to the left");
