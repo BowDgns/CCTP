@@ -20,7 +20,14 @@ public class Enemy : MonoBehaviour
                     playerController.enabled = false;
                 }
 
-                // fall
+                // disable the DetectTap GameObject in the scene
+                GameObject detectTapObject = GameObject.Find("DetectTap");
+                if (detectTapObject != null)
+                {
+                    detectTapObject.SetActive(false);
+                }
+
+                // reset player's velocity to zero to stop further movement
                 playerRb.velocity = Vector2.zero;
             }
         }

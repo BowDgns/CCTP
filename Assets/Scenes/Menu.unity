@@ -440,7 +440,7 @@ GameObject:
   - component: {fileID: 326399664}
   - component: {fileID: 326399667}
   m_Layer: 5
-  m_Name: play-button
+  m_Name: play-normal
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1233,7 +1233,7 @@ GameObject:
   - component: {fileID: 1098257546}
   - component: {fileID: 1098257545}
   m_Layer: 5
-  m_Name: play-button (1)
+  m_Name: play-unconventional
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1567,7 +1567,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: hai
+  m_text: 'PLAY
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1f25a0ef2a7734be581dc86b89b492a1, type: 2}
   m_sharedMaterial: {fileID: 3436595921927235354, guid: 1f25a0ef2a7734be581dc86b89b492a1, type: 2}

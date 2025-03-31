@@ -8,8 +8,8 @@ public class PlayerController : MonoBehaviour
     public float screen_padding = 0.1f; // padding for how far the player can jump from the screen
 
     // points for the player to jump towards
-    public GameObject left_point; 
-    public GameObject right_point; 
+    public GameObject left_point;
+    public GameObject right_point;
 
     private Rigidbody2D rb;
     private Camera mainCamera;
@@ -18,12 +18,14 @@ public class PlayerController : MonoBehaviour
     private bool first_jump = true;
     public float number_of_jumps = 0;
 
+    [Header("Stamina")]
     public Image stamina_bar;
     public float stamina;
     public float max_stamina;
     public float jump_cost;
 
     // animation and shadows
+    [Header("Visuals")]
     public Sprite player_jump_sprite;
     public Sprite player_idle_sprite;
     public Sprite shadow_jump_sprite;
@@ -34,12 +36,17 @@ public class PlayerController : MonoBehaviour
 
     public GameObject shadowObject;
 
+    // New variable to track game start time
+    private float gameStartTime;
+
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
-        rb.gravityScale = 0f; // set gravity to 0 so the player doesnt fall before the game starts
+        gameStartTime = Time.time;  // Record when the game starts
 
-        // get values to ensure player doesnt go off screen 
+        rb = GetComponent<Rigidbody2D>();
+        rb.gravityScale = 0f; // set gravity to 0 so the player doesn't fall before the game starts
+
+        // get values to ensure player doesn't go off screen 
         mainCamera = Camera.main;
         camera_width = mainCamera.orthographicSize * mainCamera.aspect;
 
@@ -62,32 +69,26 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         // get touch screen input to determine where to jump from
-
         if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
         {
             Vector2 touchPosition = Input.GetTouch(0).position;
-
-            // check which side of the screen is pressed
             float screenCenterX = Screen.width / 2f;
 
-                if (touchPosition.x < screenCenterX)  // left
-                {
-                    //Debug.Log("tapped left");
-                    Jump(true); // set to left point
-                }
-                else  // right
-                {
-                    //Debug.Log("tapped right");
-                    Jump(false); // set to right
-                }
-            
+            if (touchPosition.x < screenCenterX)  // left
+            {
+                Jump(true); // set to left point
+            }
+            else  // right
+            {
+                Jump(false); // set to right point
+            }
         }
 
         KeepPlayerInBounds();
         AnimatePlayer();
         FlipPlayer();
 
-        if(stamina < 0)
+        if (stamina < 0)
         {
             stamina = 0;
         }
@@ -95,9 +96,15 @@ public class PlayerController : MonoBehaviour
         stamina_bar.fillAmount = stamina / max_stamina;
     }
 
-    // bug with jumping right first keeps you going straight
     public void Jump(bool jump_left) // true = left tap, false = right tap
     {
+        // Prevent jumping during the first 3 seconds of the game
+        if (Time.time - gameStartTime < 3f)
+        {
+            Debug.Log("Jump disabled for the first 3 seconds.");
+            return;
+        }
+
         if (stamina > 0)
         {
             if (first_jump)
@@ -109,19 +116,16 @@ public class PlayerController : MonoBehaviour
             float screenCenterX = Screen.width / 2f;    // center of screen
             float playerScreenX = Camera.main.WorldToScreenPoint(transform.position).x; // where player is on screen
 
-            bool playerOnLeftScreen = playerScreenX < screenCenterX;
-
-            if ((jump_left && playerOnLeftScreen) || (!jump_left && !playerOnLeftScreen))   // on the same side so jump straight up
+            // When the player is on the same side as the tap, jump straight up.
+            // Otherwise (player is in the middle or on the opposite side), jump towards the designated point.
+            if ((jump_left && playerScreenX < screenCenterX) || (!jump_left && playerScreenX > screenCenterX))
             {
-                //Debug.Log("jumping up");
                 rb.velocity = Vector2.up * jump_force;
             }
-            else    // tap on opposite side, so jump over towards the jumping points.
+            else
             {
-                //Debug.Log("swap sides");
                 Vector2 targetPosition = jump_left ? left_point.transform.position : right_point.transform.position;
                 Vector2 jumpDirection = (targetPosition - (Vector2)transform.position).normalized;
-
                 rb.velocity = jumpDirection * jump_force;
             }
 
@@ -179,5 +183,4 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
-
 }
